@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+@theme {
+  --color-main-color: #FDBD02;
+  --color-black-color: #261E25;
+  --color-white-color: #F3F3EB;
+}
+
+@layer base {
+  :root {
+    background-color: var(--color-main-color);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .shadow-block {
+    filter: drop-shadow(-2px 4px var(--color-black-color));
+  }
+}
