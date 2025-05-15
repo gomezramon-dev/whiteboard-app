@@ -38,9 +38,7 @@ const App = () => {
 
   useEffect(() => {
     const app = document.getElementById("app");
-    if (!app) {
-      return;
-    }
+    if (!app) return;
 
     app.classList.toggle("pause", isWindowResizing);
     app.classList.toggle("nopause", !isWindowResizing);
@@ -61,8 +59,8 @@ const App = () => {
             transition={{ duration: 0.5 }}
           >
             <motion.div
-              className="bg-white-color border-4 border-black-color rounded-2xl shadow-block p-8 text-center text-6xl 
-   md:text-8xl"
+              className="bg-white-color border-4 border-black-color rounded-2xl shadow-block p-8 text-center text-4xl 
+   md:text-6xl font-russo-one"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
@@ -77,9 +75,7 @@ const App = () => {
         <div
           className="bg-white-color border-4 border-black-color rounded-2xl shadow-block 
         mb-8 h-32"
-        >
-          Colors & Tools
-        </div>
+        ></div>
         <CanvasComponent isWindowResizing={isWindowResizing} />
       </div>
     </>

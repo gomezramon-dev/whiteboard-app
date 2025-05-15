@@ -78,7 +78,7 @@ const CanvasComponent: React.FC<CanvasProps> = ({ isWindowResizing }) => {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [isWindowResizing]);
 
   /**
    * * Dibuja:

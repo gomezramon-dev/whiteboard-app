@@ -1,9 +1,12 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
 @import "tailwindcss";
 
 @theme {
   --color-main-color: #FDBD02;
   --color-black-color: #261E25;
   --color-white-color: #F3F3EB;
+  --font-russo-one: "Russo One", sans-serif;
 }
 
 @layer base {
