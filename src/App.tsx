@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import CanvasComponent from "@components/Canvas";
 
 const App = () => {
@@ -23,7 +24,7 @@ const App = () => {
     setIsWindowsResizing(true);
     timeOutFunctionId.current = setTimeout(
       () => setIsWindowsResizing(false),
-      100,
+      300,
     );
   };
 
@@ -35,13 +36,53 @@ const App = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const app = document.getElementById("app");
+    if (!app) {
+      return;
+    }
+
+    app.classList.toggle("pause", isWindowResizing);
+    app.classList.toggle("nopause", !isWindowResizing);
+    return () => {
+      app.classList.remove("gray", "nogray");
+    };
+  }, [isWindowResizing]);
+
   return (
-    <div id="app" className="flex flex-col p-12 min-h-screen">
-      <div className="bg-white-color border-4 border-black-color rounded-2xl shadow-block mb-8 h-32">
-        Colors & Tools
+    <>
+      <AnimatePresence>
+        {isWindowResizing && (
+          <motion.div
+            className="absolute bg-main-color inset-0 flex items-center justify-center z-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div
+              className="bg-white-color border-4 border-black-color rounded-2xl shadow-block p-8 text-center text-6xl 
+   md:text-8xl"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+            >
+              Loading...
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div id="app" className="flex flex-col p-12 min-h-screen">
+        <div
+          className="bg-white-color border-4 border-black-color rounded-2xl shadow-block 
+        mb-8 h-32"
+        >
+          Colors & Tools
+        </div>
+        <CanvasComponent isWindowResizing={isWindowResizing} />
       </div>
-      <CanvasComponent isWindowResizing={isWindowResizing} />
-    </div>
+    </>
   );
 };
 
