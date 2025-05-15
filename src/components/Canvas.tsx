@@ -12,7 +12,6 @@ const CanvasComponent: React.FC = () => {
     cssHeight: 0,
   });
   const sizeRef = useRef(size);
-  const [isResizing, setIsResizing] = useState(false);
 
   useEffect(() => {
     sizeRef.current = size;
