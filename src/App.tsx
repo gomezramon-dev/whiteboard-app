@@ -1,80 +1,42 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import CanvasComponent from "@components/Canvas";
+import useDebounce from "@utils/useDebounce";
 
 const App = () => {
-  const [isWindowResizing, setIsWindowsResizing] = useState(false);
-  const [isRemoveCanvas, setIsRemoveCanvas] = useState(false);
-  const timeOutFunctionWindow = useRef<NodeJS.Timeout | null>(null);
-  const timeOutFunctionCanvas = useRef<NodeJS.Timeout | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [canvasKey, setCanvasKey] = useState(0);
+  const incrementKey = useCallback(() => setCanvasKey((k) => k + 1), []);
+  const stopLoading = useCallback(() => setIsLoading(false), []);
 
-  /**
-   * * Manejo del redimensionamiento de la ventana:
-   * * - Define la función handleResize que:
-   * *     - Limpia cualquier setTimeout previo para evitar múltiples ejecuciones pendientes.
-   * *     - Establece el estado isWindowResizing a true.
-   * *     - Inicia un nuevo setTimeout para regresar isWindowResizing a false después de 500ms.
-   * * - Al montar el componente:
-   * *     - Agrega un event listener al evento 'resize' del objeto window que llama a handleResize.
-   * * - Al desmontar el componente:
-   * *     - Remueve el event listener de 'resize' de window.
-   * *     - Limpia cualquier timeout pendiente al desmontar para evitar efectos secundarios fuera del ciclo de vida.
-   */
-  const handleResize = () => {
-    if (timeOutFunctionWindow.current)
-      clearTimeout(timeOutFunctionWindow.current);
-    if (timeOutFunctionCanvas.current)
-      clearTimeout(timeOutFunctionCanvas.current);
-
-    setIsWindowsResizing(true);
-    timeOutFunctionCanvas.current = setTimeout(
-      () => setIsRemoveCanvas(true),
-      150,
-    );
-    timeOutFunctionCanvas.current = setTimeout(
-      () => setIsRemoveCanvas(false),
-      200,
-    );
-    timeOutFunctionWindow.current = setTimeout(
-      () => setIsWindowsResizing(false),
-      300,
-    );
-  };
-
-  console.log(isRemoveCanvas);
+  const debouncedKey = useDebounce(incrementKey, 200);
+  const debouncedLoadingOff = useDebounce(stopLoading, 500);
 
   useEffect(() => {
-    window.addEventListener("resize", handleResize);
+    const handleResize = () => {
+      setIsLoading(true);
+      debouncedKey();
+      debouncedLoadingOff();
+    };
+
+    window.addEventListener("resize", handleResize, { passive: true });
     return () => {
       window.removeEventListener("resize", handleResize);
-      if (timeOutFunctionWindow.current)
-        clearTimeout(timeOutFunctionWindow.current);
-      if (timeOutFunctionCanvas.current)
-        clearTimeout(timeOutFunctionCanvas.current);
+      debouncedKey.cancel();
+      debouncedLoadingOff.cancel();
     };
-  }, []);
-
-  useEffect(() => {
-    const app = document.getElementById("app");
-    if (!app) return;
-
-    app.classList.toggle("pause", isWindowResizing);
-    app.classList.toggle("nopause", !isWindowResizing);
-    return () => {
-      app.classList.remove("gray", "nogray");
-    };
-  }, [isWindowResizing]);
+  }, [debouncedKey, debouncedLoadingOff]);
 
   return (
     <>
       <AnimatePresence>
-        {isWindowResizing && (
+        {isLoading && (
           <motion.div
             className="absolute bg-main-color inset-0 flex items-center justify-center z-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.15 }}
           >
             <motion.div
               className="bg-white-color border-4 border-black-color rounded-2xl shadow-block p-8 text-center text-4xl 
@@ -89,14 +51,12 @@ const App = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <div id="app" className="flex flex-col p-12 min-h-screen">
+      <div className="flex flex-col p-12 min-h-screen">
         <div
           className="bg-white-color border-4 border-black-color rounded-2xl shadow-block 
         mb-8 h-32"
         ></div>
-        {!isRemoveCanvas && (
-          <CanvasComponent isWindowResizing={isWindowResizing} />
-        )}
+        <CanvasComponent key={canvasKey} />
       </div>
     </>
   );

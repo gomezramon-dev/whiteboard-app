@@ -1,32 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 
-interface CanvasSizeState {
-  width: number;
-  height: number;
-}
-
-interface CanvasProps {
-  isWindowResizing: boolean;
-}
-
-const CanvasComponent: React.FC<CanvasProps> = ({ isWindowResizing }) => {
+const CanvasComponent = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [devicePixelRatio, setDevicePixelRatio] = useState(
-    typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1,
-  );
-  const [bufferSize, setBufferSize] = useState<CanvasSizeState>({
+  const [bufferSize, setBufferSize] = useState({
     width: 0,
     height: 0,
   });
-
-  useEffect(() => {
-    if (isWindowResizing) {
-      setDevicePixelRatio(
-        typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1,
-      );
-      setBufferSize({ width: 0, height: 0 });
-    }
-  }, [isWindowResizing]);
 
   /**
    * * Redimensionar:
@@ -43,37 +22,30 @@ const CanvasComponent: React.FC<CanvasProps> = ({ isWindowResizing }) => {
    * * - El ResizeObserver se deslinda del Canvas una vez se haya desmontado el componente
    */
   const resizeHandler: ResizeObserverCallback = (entries) => {
-    for (const entry of entries) {
-      const newDevicePixelRatio = window.devicePixelRatio | 1;
+    const entry = entries[0];
 
-      const calculatedBufferWidth = Math.floor(
-        entry.contentRect.width * newDevicePixelRatio,
-      );
-      const calculatedBufferHeight = Math.floor(
-        entry.contentRect.height * newDevicePixelRatio,
-      );
+    const newDevicePixelRatio = window.devicePixelRatio || 1;
 
-      setDevicePixelRatio((prevDevicePixelRatio) => {
-        if (prevDevicePixelRatio !== newDevicePixelRatio)
-          return newDevicePixelRatio;
+    const calculatedBufferWidth = Math.floor(
+      entry.contentRect.width * newDevicePixelRatio,
+    );
+    const calculatedBufferHeight = Math.floor(
+      entry.contentRect.height * newDevicePixelRatio,
+    );
 
-        return prevDevicePixelRatio;
-      });
+    setBufferSize((prevBufferSize) => {
+      if (
+        prevBufferSize.width !== calculatedBufferWidth ||
+        prevBufferSize.height !== calculatedBufferHeight
+      ) {
+        return {
+          width: calculatedBufferWidth,
+          height: calculatedBufferHeight,
+        };
+      }
 
-      setBufferSize((prevBufferSize) => {
-        if (
-          prevBufferSize.width !== calculatedBufferWidth ||
-          prevBufferSize.height !== calculatedBufferHeight
-        ) {
-          return {
-            width: calculatedBufferWidth,
-            height: calculatedBufferHeight,
-          };
-        }
-
-        return prevBufferSize;
-      });
-    }
+      return prevBufferSize;
+    });
   };
 
   useEffect(() => {
@@ -106,19 +78,15 @@ const CanvasComponent: React.FC<CanvasProps> = ({ isWindowResizing }) => {
     const ctx = canvasElementForDraw.getContext("2d");
     if (!ctx) return;
 
-    if (isWindowResizing || bufferSize.width === 0 || bufferSize.height === 0) {
-      ctx.clearRect(0, 0, bufferSize.width, bufferSize.height);
-      return;
-    }
-
+    const currentDevicePixelRatio = window.devicePixelRatio || 1;
     ctx.resetTransform?.();
     ctx.clearRect(0, 0, bufferSize.width, bufferSize.height);
-    ctx.scale(devicePixelRatio, devicePixelRatio);
+    ctx.scale(currentDevicePixelRatio, currentDevicePixelRatio);
     ctx.fillStyle = "#000";
     ctx.beginPath();
     ctx.arc(50, 100, 20, 0, 2 * Math.PI);
     ctx.fill();
-  }, [isWindowResizing, bufferSize, devicePixelRatio]);
+  }, [bufferSize]);
 
   return (
     <canvas
