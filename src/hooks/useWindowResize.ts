@@ -4,9 +4,9 @@ import { ResizeObserver } from "@utils/observer/resizeObserver";
 
 const useWindowResize = (): boolean => {
   const [isResizing, setIsResizing] = useState(false);
-  const resizeObserver = new ResizeObserver(setIsResizing);
 
   useEffect(() => {
+    const resizeObserver = new ResizeObserver(setIsResizing);
     resizeSubject.subscribe(resizeObserver);
     return () => {
       resizeSubject.unsubscribe(resizeObserver);
