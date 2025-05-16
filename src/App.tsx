@@ -4,7 +4,9 @@ import CanvasComponent from "@components/Canvas";
 
 const App = () => {
   const [isWindowResizing, setIsWindowsResizing] = useState(false);
-  const timeOutFunctionId = useRef<NodeJS.Timeout | null>(null);
+  const [isRemoveCanvas, setIsRemoveCanvas] = useState(false);
+  const timeOutFunctionWindow = useRef<NodeJS.Timeout | null>(null);
+  const timeOutFunctionCanvas = useRef<NodeJS.Timeout | null>(null);
 
   /**
    * * Manejo del redimensionamiento de la ventana:
@@ -19,20 +21,36 @@ const App = () => {
    * *     - Limpia cualquier timeout pendiente al desmontar para evitar efectos secundarios fuera del ciclo de vida.
    */
   const handleResize = () => {
-    if (timeOutFunctionId.current) clearTimeout(timeOutFunctionId.current);
+    if (timeOutFunctionWindow.current)
+      clearTimeout(timeOutFunctionWindow.current);
+    if (timeOutFunctionCanvas.current)
+      clearTimeout(timeOutFunctionCanvas.current);
 
     setIsWindowsResizing(true);
-    timeOutFunctionId.current = setTimeout(
+    timeOutFunctionCanvas.current = setTimeout(
+      () => setIsRemoveCanvas(true),
+      150,
+    );
+    timeOutFunctionCanvas.current = setTimeout(
+      () => setIsRemoveCanvas(false),
+      200,
+    );
+    timeOutFunctionWindow.current = setTimeout(
       () => setIsWindowsResizing(false),
       300,
     );
   };
 
+  console.log(isRemoveCanvas);
+
   useEffect(() => {
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
-      if (timeOutFunctionId.current) clearTimeout(timeOutFunctionId.current);
+      if (timeOutFunctionWindow.current)
+        clearTimeout(timeOutFunctionWindow.current);
+      if (timeOutFunctionCanvas.current)
+        clearTimeout(timeOutFunctionCanvas.current);
     };
   }, []);
 
@@ -76,7 +94,9 @@ const App = () => {
           className="bg-white-color border-4 border-black-color rounded-2xl shadow-block 
         mb-8 h-32"
         ></div>
-        <CanvasComponent isWindowResizing={isWindowResizing} />
+        {!isRemoveCanvas && (
+          <CanvasComponent isWindowResizing={isWindowResizing} />
+        )}
       </div>
     </>
   );

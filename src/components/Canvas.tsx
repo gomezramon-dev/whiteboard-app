@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-interface CanvasBufferSizeState {
+interface CanvasSizeState {
   width: number;
   height: number;
 }
@@ -14,10 +14,19 @@ const CanvasComponent: React.FC<CanvasProps> = ({ isWindowResizing }) => {
   const [devicePixelRatio, setDevicePixelRatio] = useState(
     typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1,
   );
-  const [bufferSize, setBufferSize] = useState<CanvasBufferSizeState>({
+  const [bufferSize, setBufferSize] = useState<CanvasSizeState>({
     width: 0,
     height: 0,
   });
+
+  useEffect(() => {
+    if (isWindowResizing) {
+      setDevicePixelRatio(
+        typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1,
+      );
+      setBufferSize({ width: 0, height: 0 });
+    }
+  }, [isWindowResizing]);
 
   /**
    * * Redimensionar:
@@ -78,7 +87,7 @@ const CanvasComponent: React.FC<CanvasProps> = ({ isWindowResizing }) => {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [isWindowResizing]);
+  }, []);
 
   /**
    * * Dibuja:

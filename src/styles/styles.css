@@ -20,13 +20,13 @@
   .shadow-block {
     filter: drop-shadow(-2px 4px var(--color-black-color));
   }
-}
 
-.pause {
-  filter: blur(1.5rem);
-  transition: all .3s linear;
-}
-
-.nopause {
-  transition: all .3s linear;
+  .pause {
+    filter: blur(2.5rem);
+    transition: all .5s linear;
+  }
+  
+  .nopause {
+    transition: all .3s linear;
+  }
 }
