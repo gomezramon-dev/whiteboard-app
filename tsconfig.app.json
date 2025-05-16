@@ -20,8 +20,9 @@
     "paths": {
       "@assets/": ["./src/assets/*"],
       "@components/*": ["./src/components/*"],
-      "@hooks/*": ["./src/lib/hooks/*"],
-      "@stores/*": ["./src/lib/stores/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@interfaces/*": ["./src/interfaces/*"],
+      "@stores/*": ["./src/stores/*"],
       "@utils/*": ["./src/utils/*"],
       "@styles/*": ["./src/styles/*"]
     },
