@@ -1,4 +1,4 @@
-import { type ResizeEventType } from "@utils/observer/resizeSubject";
+import { type ResizeEventType } from "@utils/observer/ResizeSubject";
 
 export class ResizeObserver {
   private setIsResizing: React.Dispatch<React.SetStateAction<boolean>>;
