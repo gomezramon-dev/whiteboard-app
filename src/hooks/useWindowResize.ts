@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { resizeSubject } from "@utils/observer/resizeSubject";
-import { ResizeObserver } from "@utils/observer/resizeObserver";
+import { resizeSubject } from "@utils/observer/ResizeSubject";
+import { ResizeObserver } from "@utils/observer/ResizeObserver";
 
 const useWindowResize = (): boolean => {
   const [isResizing, setIsResizing] = useState(false);
