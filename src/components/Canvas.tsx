@@ -4,6 +4,9 @@ import {
   type ShapeType,
   type ShapeOptions,
 } from "@utils/factory/ShapeFactory";
+import { CanvasModel } from "@utils/command/CanvasModel";
+import { CommandManager } from "@utils/command/CommandManager";
+import { DrawCommand } from "@utils/command/DrawCommand";
 import { ColorDecorator } from "@utils/decorators/ColorDecorator";
 
 interface CanvasProps {
@@ -14,6 +17,8 @@ interface CanvasProps {
 const CanvasComponent: React.FC<CanvasProps> = ({ tool, color }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
+  const model = useRef(new CanvasModel()).current;
+  const history = useRef(new CommandManager()).current;
   const [size, setSize] = useState({
     width: 0,
     height: 0,
@@ -45,6 +50,27 @@ const CanvasComponent: React.FC<CanvasProps> = ({ tool, color }) => {
     ctx.clearRect(0, 0, size.width, size.height);
     ctx.scale(dpr, dpr);
   }, [size]);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      const isMod = e.ctrlKey || e.metaKey;
+      if (!isMod) return;
+
+      if (!e.shiftKey && key === "z") {
+        e.preventDefault();
+        history.undo();
+      }
+
+      if (key === "y" || (e.shiftKey && key === "z")) {
+        e.preventDefault();
+        history.redo();
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [history]);
 
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const ctx = contextRef.current;
@@ -86,6 +112,8 @@ const CanvasComponent: React.FC<CanvasProps> = ({ tool, color }) => {
     const shape = ShapeFactory.create(tool, opts);
     const coloredShape = new ColorDecorator(shape, color);
     coloredShape.draw(ctx);
+    const cmd = new DrawCommand(coloredShape, ctx, model);
+    history.execute(cmd);
   };
 
   return (
