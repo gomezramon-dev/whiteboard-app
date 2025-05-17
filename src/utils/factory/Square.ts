@@ -9,7 +9,10 @@ export interface SquareOptions {
 }
 
 export class Square implements IShape {
-  constructor(private opts: SquareOptions) {}
+  private opts: SquareOptions;
+  constructor(opts: SquareOptions) {
+    this.opts = opts;
+  }
 
   draw(ctx: CanvasRenderingContext2D) {
     const { x, y, length, fillStyle, strokeStyle } = this.opts;
@@ -21,5 +24,9 @@ export class Square implements IShape {
       ctx.strokeStyle = strokeStyle;
       ctx.strokeRect(x, y, length, length);
     }
+  }
+
+  setOptions(opts: Partial<SquareOptions>) {
+    this.opts = { ...this.opts, ...opts };
   }
 }

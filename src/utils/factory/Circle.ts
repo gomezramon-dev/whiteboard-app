@@ -9,7 +9,10 @@ export interface CircleOptions {
 }
 
 export class Circle implements IShape {
-  constructor(private opts: CircleOptions) {}
+  private opts: CircleOptions;
+  constructor(opts: CircleOptions) {
+    this.opts = opts;
+  }
 
   draw(ctx: CanvasRenderingContext2D) {
     const { x, y, radius, fillStyle, strokeStyle } = this.opts;
@@ -23,5 +26,9 @@ export class Circle implements IShape {
       ctx.strokeStyle = strokeStyle;
       ctx.stroke();
     }
+  }
+
+  setOptions(opts: Partial<CircleOptions>) {
+    this.opts = { ...this.opts, ...opts };
   }
 }

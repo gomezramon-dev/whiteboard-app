@@ -1,6 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import {
+  ShapeFactory,
+  type ShapeType,
+  type ShapeOptions,
+} from "@utils/factory/ShapeFactory";
+import { ColorDecorator } from "@utils/decorators/ColorDecorator";
 
-const CanvasComponent = () => {
+interface CanvasProps {
+  tool: ShapeType | "delete";
+  color: string;
+}
+
+const CanvasComponent: React.FC<CanvasProps> = ({ tool, color }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const [size, setSize] = useState({
@@ -12,47 +23,70 @@ const CanvasComponent = () => {
     const canvasElement = canvasRef.current;
     if (!canvasElement) return;
 
-    const canvasSize = canvasElement.getBoundingClientRect();
+    const rect = canvasElement.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    const calculatedWidth = Math.floor(canvasSize.width * dpr);
-    const calculatedHeight = Math.floor(canvasSize.height * dpr);
+    const w = Math.floor(rect.width * dpr);
+    const h = Math.floor(rect.height * dpr);
 
-    setSize((prevSize) => {
-      if (
-        prevSize.width !== calculatedWidth ||
-        prevSize.height !== calculatedHeight
-      ) {
-        return {
-          width: calculatedWidth,
-          height: calculatedHeight,
-        };
-      }
-
-      return prevSize;
-    });
+    setSize((prev) =>
+      prev.width !== w || prev.height !== h ? { width: w, height: h } : prev,
+    );
   }, []);
 
-  useEffect(() => {
-    if (size.width === 0 || size.height === 0) return;
+  useLayoutEffect(() => {
+    if (!canvasRef.current) return;
+    const ctx = canvasRef.current.getContext("2d");
+    if (!ctx) return;
 
-    const canvasElement = canvasRef.current!;
-    if (!contextRef.current) {
-      const c = canvasElement.getContext("2d");
-      if (!c) return;
-      contextRef.current = c;
-    }
+    contextRef.current = ctx;
 
-    const ctx = contextRef.current;
-
+    const dpr = window.devicePixelRatio || 1;
     ctx.resetTransform?.();
     ctx.clearRect(0, 0, size.width, size.height);
-    const dpr = window.devicePixelRatio || 1;
     ctx.scale(dpr, dpr);
-    ctx.fillStyle = "#000";
-    ctx.beginPath();
-    ctx.arc(50, 100, 20, 0, 2 * Math.PI);
-    ctx.fill();
   }, [size]);
+
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const ctx = contextRef.current;
+    const canvasElement = canvasRef.current;
+    if (!ctx || !canvasElement) return;
+
+    const rect = canvasElement.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if (tool === "delete") {
+      ctx.resetTransform?.();
+      ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+      return;
+    }
+
+    let opts: ShapeOptions;
+    switch (tool) {
+      case "circle":
+        opts = { x, y, radius: 30 };
+        break;
+      case "square":
+        opts = { x: x - 25, y: y - 25, length: 50 };
+        break;
+      case "line":
+        opts = {
+          x1: x - 30,
+          y1: y - 30,
+          x2: x + 30,
+          y2: y + 30,
+          length: Math.hypot(600, 600),
+        };
+        break;
+      default:
+        return;
+    }
+
+    const shape = ShapeFactory.create(tool, opts);
+    const coloredShape = new ColorDecorator(shape, color);
+    coloredShape.draw(ctx);
+  };
 
   return (
     <canvas
@@ -60,6 +94,7 @@ const CanvasComponent = () => {
       ref={canvasRef}
       width={size.width}
       height={size.height}
+      onClick={handleClick}
     />
   );
 };

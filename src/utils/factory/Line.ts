@@ -11,7 +11,10 @@ export interface LineOptions {
 }
 
 export class Line implements IShape {
-  constructor(private opts: LineOptions) {}
+  private opts: LineOptions;
+  constructor(opts: LineOptions) {
+    this.opts = opts;
+  }
 
   draw(ctx: CanvasRenderingContext2D) {
     const { x1, y1, x2, y2, strokeStyle, lineWidth } = this.opts;
@@ -27,5 +30,9 @@ export class Line implements IShape {
     }
 
     ctx.stroke();
+  }
+
+  setOptions(opts: Partial<LineOptions>) {
+    this.opts = { ...this.opts, ...opts };
   }
 }
