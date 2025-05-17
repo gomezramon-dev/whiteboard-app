@@ -12,4 +12,7 @@ export default defineConfig({
     },
   },
   plugins: [react(), tailwindcss(), tsconfigPaths()],
+  optimizeDeps: {
+    include: ["@mui/icons-material/Delete"],
+  },
 });

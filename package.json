@@ -11,6 +11,9 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.1.0",
     "@tailwindcss/vite": "^4.1.6",
     "@types/lodash.debounce": "^4.0.9",
     "framer-motion": "^12.11.4",
